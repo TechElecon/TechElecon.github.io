@@ -75,7 +75,7 @@
         var user_id;
         // User is signed in
 
-        var i = 0;
+        var ii = 0;
         // Check if the user is signed in
         auth.onAuthStateChanged(function (user) {
             if (user) {
@@ -83,10 +83,12 @@
                 user_id = user.uid;
                 // Fetch data from Firebase Realtime Database using UID
                 onValue(ref(db, "users/" + user_id), (snapshot) => {
+                    ii++;
+                    if(ii%2==0){
                     console.log("hello")
                     var userData = snapshot.val();
                     console.log(userData);
-                    i++;
+               
                     // Update accelerometer data
                     myChart.data.datasets[0].data.push(parseFloat(userData.accelX));
                     myChart.data.datasets[1].data.push(parseFloat(userData.accelY));
@@ -100,7 +102,7 @@
                     // Update temperature data
                     myChart.data.datasets[6].data.push(parseFloat(userData.temperature));
 
-                    myChart.data.labels.push(i);
+                    myChart.data.labels.push(ii);
 
                     if (myChart.data.labels.length > 11) {
                         // Remove oldest data to keep the graph tidy
@@ -113,6 +115,7 @@
                     myChart.update();
                     var timestampValue = document.getElementById('timestampValue');
                     timestampValue.textContent = userData.timestamp;
+                        }
                 });
             } else {
                 // User is not signed in, redirect or handle accordingly
