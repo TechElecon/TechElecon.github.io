@@ -83,7 +83,6 @@
                 user_id = user.uid;
                 // Fetch data from Firebase Realtime Database using UID
                 onValue(ref(db, "users/" + user_id), (snapshot) => {
-                    ii++;
                     if(ii%2==0){
                     console.log("hello")
                     var userData = snapshot.val();
@@ -116,6 +115,7 @@
                     var timestampValue = document.getElementById('timestampValue');
                     timestampValue.textContent = userData.timestamp;
                         }
+                                        ii++;
                 });
             } else {
                 // User is not signed in, redirect or handle accordingly
