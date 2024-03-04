@@ -33,23 +33,97 @@
         .toggledark {
             cursor: pointer;
         }
+
         .dark-mode {
             background: #333;
             color: #fff;
         }
+
+
+    /* Style for the transparent div */
+    .transparent-div {
+      position: absolute;
+      width: auto;
+      background: none;
+    }
+
+    /* Style for the grey text */
+    /* .grey-text {
+      color: grey;
+    } */
+
+    /* Style for the main content */
+    .main-content {
+      padding: 20px;
+    }
     </style>
 </head>
 
 <body>
     <div class="info-container">
-        <span class="toggledark"  id="darkModeButton" >Dark Mode</span>
+        <span class="toggledark" id="darkModeButton">Dark Mode</span>
         <span class="timestamp" id="timestampValue">Timestamp</span>
         <span class="datafiles">Data Files</span>
     </div>
+        <div class="transparent-div" id="draggableDiv">
+            <pre id="jsonDisplay" class="grey-text"></pre>
 
-    <canvas id="realtimeGraph"></canvas>
-
-
+        </div>
+        <!-- Other content of the parent container goes here -->
+    <canvas id="realtimeGraph" class="main-content"></canvas>
+    <script>
+        // Make the div draggable
+        dragElement(document.getElementById("draggableDiv"));
+    
+        function dragElement(elmnt) {
+          var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+          if (document.getElementById(elmnt.id + "-header")) {
+            // if present, the header is where you move the DIV from:
+            document.getElementById(elmnt.id + "-header").onmousedown = dragMouseDown;
+          } else {
+            // otherwise, move the DIV from anywhere inside the DIV:
+            elmnt.onmousedown = dragMouseDown;
+          }
+    
+          function dragMouseDown(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // get the mouse cursor position at startup:
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            document.onmouseup = closeDragElement;
+            // call a function whenever the cursor moves:
+            document.onmousemove = elementDrag;
+          }
+    
+          function elementDrag(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // calculate the new cursor position:
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            // set the element's new position:
+            var newTop = elmnt.offsetTop - pos2;
+            var newLeft = elmnt.offsetLeft - pos1;
+    
+            // Check if the new position is within the window boundaries
+            if (newTop >= 0 && newLeft >= 0 &&
+                newTop + elmnt.offsetHeight <= window.innerHeight &&
+                newLeft + elmnt.offsetWidth <= window.innerWidth) {
+              elmnt.style.top = newTop + "px";
+              elmnt.style.left = newLeft + "px";
+            }
+          }
+    
+          function closeDragElement() {
+            // stop moving when mouse button is released:
+            document.onmouseup = null;
+            document.onmousemove = null;
+          }
+        }
+</script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module">
         // Import the functions you need from the SDKs you need
@@ -83,39 +157,40 @@
                 user_id = user.uid;
                 // Fetch data from Firebase Realtime Database using UID
                 onValue(ref(db, "users/" + user_id), (snapshot) => {
-                    if(ii%2==0){
-                    console.log("hello")
-                    var userData = snapshot.val();
-                    console.log(userData);
-               
-                    // Update accelerometer data
-                    myChart.data.datasets[0].data.push(parseFloat(userData.accelX));
-                    myChart.data.datasets[1].data.push(parseFloat(userData.accelY));
-                    myChart.data.datasets[2].data.push(parseFloat(userData.accelZ));
+                    document.getElementById('jsonDisplay').textContent = JSON.stringify(snapshot.val(), null, 2).replace("{\n","").replace(/"/g, ' ').replace(/,/g, '').replace(/   /g, '').replace(/\n}/g, '');
+                    if (ii % 2 == 0) {
+                        console.log("hello")
+                        var userData = snapshot.val();
+                        console.log(userData);
 
-                    // Update gyroscope data
-                    myChart.data.datasets[3].data.push(parseFloat(userData.gyroX));
-                    myChart.data.datasets[4].data.push(parseFloat(userData.gyroY));
-                    myChart.data.datasets[5].data.push(parseFloat(userData.gyroZ));
+                        // Update accelerometer data
+                        myChart.data.datasets[0].data.push(parseFloat(userData.accelX));
+                        myChart.data.datasets[1].data.push(parseFloat(userData.accelY));
+                        myChart.data.datasets[2].data.push(parseFloat(userData.accelZ));
 
-                    // Update temperature data
-                    myChart.data.datasets[6].data.push(parseFloat(userData.temperature));
+                        // Update gyroscope data
+                        myChart.data.datasets[3].data.push(parseFloat(userData.gyroX));
+                        myChart.data.datasets[4].data.push(parseFloat(userData.gyroY));
+                        myChart.data.datasets[5].data.push(parseFloat(userData.gyroZ));
 
-                    myChart.data.labels.push(ii);
+                        // Update temperature data
+                        myChart.data.datasets[6].data.push(parseFloat(userData.temperature));
 
-                    if (myChart.data.labels.length > 11) {
-                        // Remove oldest data to keep the graph tidy
-                        myChart.data.labels.shift();
-                        for (var i = 0; i < 7; i++) {
-                            myChart.data.datasets[i].data.shift();
+                        myChart.data.labels.push(ii);
+
+                        if (myChart.data.labels.length > 11) {
+                            // Remove oldest data to keep the graph tidy
+                            myChart.data.labels.shift();
+                            for (var i = 0; i < 7; i++) {
+                                myChart.data.datasets[i].data.shift();
+                            }
                         }
+
+                        myChart.update();
+                        var timestampValue = document.getElementById('timestampValue');
+                        timestampValue.textContent = userData.timestamp;
                     }
-
-                    myChart.update();
-                    var timestampValue = document.getElementById('timestampValue');
-                    timestampValue.textContent = userData.timestamp;
-                        }
-                                        ii++;
+                    ii++;
                 });
             } else {
                 // User is not signed in, redirect or handle accordingly
