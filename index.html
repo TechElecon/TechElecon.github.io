@@ -149,7 +149,7 @@
         var user_id;
         // User is signed in
 
-        // var ii = 0;
+        var ii = 0;
         // Check if the user is signed in
         auth.onAuthStateChanged(function (user) {
             if (user) {
@@ -175,7 +175,11 @@
 
                         // Update temperature data
                         myChart.data.datasets[6].data.push(parseFloat(userData.temperature));
-
+                    
+                        // Update data
+                        myChart.data.datasets[7].data.push(parseFloat(userData.VibraVeloX));
+                        myChart.data.datasets[8].data.push(parseFloat(userData.VibraVeloY));
+                        myChart.data.datasets[9].data.push(parseFloat(userData.VibraVeloZ));
                         myChart.data.labels.push(ii);
 
                         if (myChart.data.labels.length > 11) {
@@ -190,7 +194,7 @@
                         var timestampValue = document.getElementById('timestampValue');
                         timestampValue.textContent = userData.timestamp;
                     // }
-                    // ii++;
+                    ii++;
                 });
             } else {
                 // User is not signed in, redirect or handle accordingly
@@ -262,7 +266,22 @@
                         label: 'Temperature',
                         borderColor: 'rgb(255, 0, 0)',
                         data: [],
-                    }
+                    },
+                          {
+        label: 'Vibration Velocity X',
+        borderColor: 'rgb(0, 255, 0)',
+        data: [],
+      },
+      {
+        label: 'Vibration Velocity Y',
+        borderColor: 'rgb(0, 0, 255)',
+        data: [],
+      },
+      {
+        label: 'Vibration Velocity Z',
+        borderColor: 'rgb(255, 255, 0)',
+        data: [],
+      }
                 ]
             },
             options: {
