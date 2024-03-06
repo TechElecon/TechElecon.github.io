@@ -177,9 +177,9 @@
                         myChart.data.datasets[6].data.push(parseFloat(userData.temperature));
                     
                         // Update data
-                        myChart.data.datasets[7].data.push(parseFloat(userData.VibraVeloX));
-                        myChart.data.datasets[8].data.push(parseFloat(userData.VibraVeloY));
-                        myChart.data.datasets[9].data.push(parseFloat(userData.VibraVeloZ));
+                        myChart.data.datasets[7].data.push(parseFloat(userData.p2pX));
+                        myChart.data.datasets[8].data.push(parseFloat(userData.p2pY));
+                        myChart.data.datasets[9].data.push(parseFloat(userData.p2pZ));
                         myChart.data.labels.push(ii);
 
                         if (myChart.data.labels.length > 11) {
@@ -268,17 +268,17 @@
                         data: [],
                     },
                           {
-        label: 'Vibration Velocity X',
+        label: 'Peak To Peak X',
         borderColor: 'rgb(0, 255, 0)',
         data: [],
       },
       {
-        label: 'Vibration Velocity Y',
+        label: 'Peak To Peak Y',
         borderColor: 'rgb(0, 0, 255)',
         data: [],
       },
       {
-        label: 'Vibration Velocity Z',
+        label: 'Peak To Peak Z',
         borderColor: 'rgb(255, 255, 0)',
         data: [],
       }
