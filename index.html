@@ -234,7 +234,7 @@
                     if (onceg) {
 
                         document.getElementById('graph').style.height = (document.getElementById('graph').offsetHeight - document.querySelector(".title-bar").offsetHeight) + "px";
-                        document.getElementById('graph').style.width = (document.getElementById('graph')) + "px";
+                        document.getElementById('graph').style.width = (document.getElementById('graph').offsetWidth - document.getElementById('sidebar').offsetWidth) + "px";
                         Plotly.Plots.resize('graph');
                         document.getElementById('graph0').style.height = document.getElementById('graph').offsetHeight + "px";
                         document.getElementById('graph0').style.width = document.getElementById('graph').offsetWidth + "px";
