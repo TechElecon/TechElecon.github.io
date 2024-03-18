@@ -173,14 +173,14 @@
 <body>
     <div class="sidebar" id="sidebar">
         <!-- <a id="overview-">Overview</a> -->
-        <a id="acceleration-">Acceleration</a>
         <a id="velocity-">Velocity</a>
+        <a id="acceleration-">Acceleration</a>
         <!-- <a id="peak-to-peak-">Peak to Peak</a> -->
         <a id="temperature-">Temperature</a>
     </div>
 
     <div class="title-bar">
-        <h1 class="title">Overview</h1>
+        <h1 class="title">2024-03-16-14_36.csv (2.5 Minutes)</h1>
         <button class="toggle-btn">
             <span class="bar"></span>
             <span class="bar"></span>
@@ -218,11 +218,6 @@
             sidebar.classList.toggle("active");
             toggleBtn.classList.toggle("active");
         }
-
-        function updateTitle(title) {
-            var titleElement = document.querySelector(".title");
-            titleElement.textContent = title;
-        }
         var onceg = true;
         function showContent(contentId) {
             var contents = document.querySelectorAll(".content");
@@ -248,14 +243,12 @@
                         // Plotly.Plots.resize('graph2');
                         onceg = false;
                     }
-                    var titleElement = document.querySelector(".title");
-                    titleElement.textContent = content.id.charAt(0).toUpperCase() + content.id.slice(1);
                 } else {
                     content.style.display = "none"; // Hide other contents
                 }
             });
         }
-        showContent("acceleration-");
+        showContent("velocity-");
 
         document.addEventListener("DOMContentLoaded", function () {
             // Add event listeners to sidebar links
