@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -36,14 +35,15 @@
         .title-bar {
             background-color: #333;
             color: #fff;
-            padding: 10px 20px;
+            /* padding: 10px 20px; */
+            height: 40px;
             display: flex;
-            justify-content: space-around;
+            align-items: start;
             align-items: center;
             position: absolute;
             top: 0;
             left: 0;
-            width: calc(100% - 40px);
+            width: 100%;
 
             z-index: 5;
             /* Ensure title bar is behind the panel */
@@ -168,12 +168,32 @@
                 /* Hide the toggle button on desktops */
             }
         }
+        
+/* Style for the file input */
+#csv-file{
+    position: absolute;
+  left: 0;
+  top: 0;
+    height: 40px;
+    width: 100px;
+    opacity: 0;
+    cursor: pointer;
+    background-color: #ddd;
+}
+
+/* Style for the button */
+.custom-button {
+  padding: 10px 20px;
+  border: none; 
+  cursor: pointer;
+}
+
     </style>
 </head>
 
 <body>
     <div class="sidebar" id="sidebar">
-        <!-- <a id="overview-">Overview</a> -->
+        <a id="files-">Files</a>
         <a id="velocity-">Velocity</a>
         <a id="acceleration-">Acceleration</a>
         <!-- <a id="peak-to-peak-">Peak to Peak</a> -->
@@ -183,11 +203,8 @@
     <div class="title-bar">
         <!-- <h1 class="title">2024-03-16-14_36.csv (2.5 Minutes)</h1> -->
         <div>
-            <!-- <label for="csv-url">CSV URL:</label>
-            <input type="text" id="csv-url" placeholder="Enter URL">
-            <button onclick="loadCSVFromURL()">Load from URL</button> -->
             <input type="file" id="csv-file" accept=".csv">
-            <button onclick="loadCSVFromFile()">Upload File</button>
+            <label for="csv-file" class="custom-button">Open File</label>
         </div>
         <button class="toggle-btn">
             <span class="bar"></span>
@@ -196,10 +213,9 @@
         </button>
     </div>
 
-    <!-- <div class="content" id="overview">
-        <h2>Overview</h2>
-        <p>Overview of gearbox vibration data goes here...</p>
-    </div> -->
+    <div class="content" id="files">
+        <iframe style="border:none;" id="files0" src="https://techelecon.github.io/files"></iframe>
+    </div>
 
     <div class="content" id="velocity">
         <div id="graph1"></div>
@@ -245,10 +261,10 @@
                         document.getElementById('graph1').style.height = document.getElementById('graph').offsetHeight + "px";
                         document.getElementById('graph1').style.width = document.getElementById('graph').offsetWidth + "px";
                         Plotly.Plots.resize('graph1');
+                        document.getElementById('files0').style.height = document.getElementById('graph').offsetHeight + "px";
+                        document.getElementById('files0').style.width = document.getElementById('graph').offsetWidth + "px";
+                        Plotly.Plots.resize('files0');
 
-                        // document.getElementById('graph2').style.height = document.getElementById('graph').offsetHeight + "px";
-                        // document.getElementById('graph2').style.width = document.getElementById('graph').offsetWidth + "px";
-                        // Plotly.Plots.resize('graph2');
                         onceg = false;
                     }
                 } else {
@@ -256,7 +272,7 @@
                 }
             });
         }
-        showContent("velocity-");
+        showContent("files-");
 
         document.addEventListener("DOMContentLoaded", function () {
             // Add event listeners to sidebar links
@@ -277,36 +293,25 @@
     </script>
 
     <script>
-        // Load data from file (replace with your own logic)
-        // const data = [
-        //     { time: 1000, accelerationX: 10, accelerationY: 20, accelerationZ: 30, temperature: 25 },
-        //     { time: 2000, accelerationX: 15, accelerationY: 25, accelerationZ: 35, temperature: 26 },
-        //     // Add more data here...
-        // ];
-        // Fetch the CSV file
-        // function loadCSVFromURL() {
-        //     const csvUrl = document.getElementById('csv-url').value.trim();
-        //     if (csvUrl !== '') {
-        //         fetchCSV(csvUrl);
-        //     } else {
-        //         alert('Please enter a valid URL.');
-        //     }
-        // }
+        document.addEventListener("DOMContentLoaded", function () {
+            // Get the file input element
+            var fileInput = document.getElementById('csv-file');
 
-        function loadCSVFromFile() {
-            const fileInput = document.getElementById('csv-file');
-            const file = fileInput.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (event) {
-                    const csvData = event.target.result;
-                    parseCSV(csvData);
-                };
-                reader.readAsText(file);
-            } else {
-                alert('Please select a file.');
-            }
-        }
+            // Add event listener for when a file is selected
+            fileInput.addEventListener('change', function (event) {
+                // Get the selected file
+                var file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (event) {
+                        const csvData = event.target.result;
+                        parseCSV(csvData);
+                    };
+                    reader.readAsText(file);
+                }
+                showContent("velocity-")
+            });
+        });
 
         function fetchCSV(url) {
             fetch(url)
@@ -315,516 +320,187 @@
                 .catch(error => console.error('Error fetching CSV:', error));
         }
 
-        function parseCSV(csv)
-        {
-                // Parse the CSV data
-                const data = Papa.parse(csv, { header: true }).data;
+        function parseCSV(csv) {
+            // Parse the CSV data
+            const data = Papa.parse(csv, { header: true }).data;
+
+            // Extract data for plotting
+            const time = data.map(item => parseInt(item.Timestamp)); // Assuming 'time' is a column in your CSV
+            const accelerationX = data.map(item => parseFloat(item.AccelX)); // Assuming 'accelerationX' is a column in your CSV
+            const accelerationY = data.map(item => parseFloat(item.AccelY)); // Assuming 'accelerationY' is a column in your CSV
+            const accelerationZ = data.map(item => parseFloat(item.AccelZ)); // Assuming 'accelerationZ' is a column in your CSV
+            const temperature = data.map(item => parseFloat(item.Temperature)); // Assuming 'temperature' is a column in your CSV
 
 
-                // Extract data for plotting
-                // const time = data.map(item => item.time);
-                // const accelerationX = data.map(item => item.accelerationX);
-                // const accelerationY = data.map(item => item.accelerationY);
-                // const accelerationZ = data.map(item => item.accelerationZ);
-                // const temperature = data.map(item => item.temperature);
+            // Calculate average values for each dataset
+            const calculateAverage = (values) => {
+                const validValues = values.filter(value => !isNaN(value));
+                return validValues.length > 0 ? validValues.reduce((acc, val) => (parseFloat(acc) + parseFloat(val)).toFixed(3), 0) / validValues.length : NaN;
+            };
+            const averageX = calculateAverage(accelerationX);
+            const averageY = calculateAverage(accelerationY);
+            const averageZ = calculateAverage(accelerationZ);
+            // Calculate average values for each dataset
 
-                // Extract data for plotting
-                const time = data.map(item => parseInt(item.Timestamp)); // Assuming 'time' is a column in your CSV
-                const accelerationX = data.map(item => parseFloat(item.AccelX)); // Assuming 'accelerationX' is a column in your CSV
-                const accelerationY = data.map(item => parseFloat(item.AccelY)); // Assuming 'accelerationY' is a column in your CSV
-                const accelerationZ = data.map(item => parseFloat(item.AccelZ)); // Assuming 'accelerationZ' is a column in your CSV
-                const temperature = data.map(item => parseFloat(item.Temperature)); // Assuming 'temperature' is a column in your CSV
+            // Subtract average value from each data point
+            const modifiedAccelerationX = accelerationX.map(val => (val - averageX.toFixed(3)) * 1000);
+            const modifiedAccelerationY = accelerationY.map(val => (val - averageY.toFixed(3)) * 1000);
+            const modifiedAccelerationZ = accelerationZ.map(val => (val - averageZ.toFixed(3)) * 1000);
 
+            // Perform numerical integration to calculate velocity
+            let velocityZ = [0]; // Initialize velocity array with initial velocity as 0
+            for (let i = 1; i < time.length; i++) {
+                // Calculate the change in time
+                const dt = time[i] - time[i - 1];
 
-                // Calculate average values for each dataset
-                const calculateAverage = (values) => {
-                    const validValues = values.filter(value => !isNaN(value));
-                    return validValues.length > 0 ? validValues.reduce((acc, val) => (parseFloat(acc) + parseFloat(val)).toFixed(3), 0) / validValues.length : NaN;
-                };
-                const averageX = calculateAverage(accelerationX);
-                const averageY = calculateAverage(accelerationY);
-                const averageZ = calculateAverage(accelerationZ);
-                // Calculate average values for each dataset
+                // Calculate the area under the acceleration vs. time curve using the trapezoidal rule
+                const currentVelocity = modifiedAccelerationZ[i] * (dt / 1000);
 
-                // Subtract average value from each data point
-                const modifiedAccelerationX = accelerationX.map(val => (val - averageX.toFixed(3)) * 1000);
-                const modifiedAccelerationY = accelerationY.map(val => (val - averageY.toFixed(3)) * 1000);
-                const modifiedAccelerationZ = accelerationZ.map(val => (val - averageZ.toFixed(3)) * 1000);
-
-                // Perform numerical integration to calculate velocity
-                let velocityZ = [0]; // Initialize velocity array with initial velocity as 0
-                for (let i = 1; i < time.length; i++) {
-                    // Calculate the change in time
-                    const dt = time[i] - time[i - 1];
-
-                    // Calculate the area under the acceleration vs. time curve using the trapezoidal rule
-                    const currentVelocity = modifiedAccelerationZ[i] * (dt / 1000);
-                    // Calculate velocity by adding the area to the previous velocity
-                    // const prevVelocity = velocityX[i - 1];
-                    // const currentVelocity = prevVelocity + area;
-
-                    // Add the calculated velocity to the velocity array
-                    velocityZ.push(currentVelocity);
-                }
-                const indicesR = [];
-                // Find indices where acceleration is greater than 2.3
-                const indices = velocityZ.reduce((acc, val, idx) => {
-                    if (val > 2.3) {
-                        if (val > 4.5) {
-                            indicesR.push(idx);
-                        } else {
-                            acc.push(idx);
-                        }
-                    }
-                    return acc;
-                }, []);
-
-
-                // Initialize variables
-                // const windowSize = 1000; // 1 second window size in milliseconds
-                // const peaks = [];
-                // const peaksT = [];
-                // j = 0;
-                // Iterate over the data in 1-second intervals
-                // for (let i = 0; i < time.length; i++) {
-                //     const startTime = time[i];
-                //     const endTime = startTime + windowSize;
-
-                //     let maxAcceleration = -Infinity;
-                //     let minAcceleration = Infinity;
-
-                //     // Find maximum and minimum acceleration within the window
-                //     while (time[i] <= endTime && i < time.length) {
-                //         maxAcceleration = Math.max(maxAcceleration, modifiedAccelerationX[i]);
-                //         minAcceleration = Math.min(minAcceleration, modifiedAccelerationX[i]);
-                //         i++;
-                //     }
-
-                //     // Calculate peak-to-peak value for the window
-                //     const peakToPeak = maxAcceleration - minAcceleration;
-
-                //     // Store peak-to-peak value and the corresponding time
-                //     peaks.push(peakToPeak);
-                //     j++;
-                //     peaksT.push(j);
-                // }
-                // Create traces for each dataset
-                const traceX = {
-                    x: time,
-                    y: modifiedAccelerationX,
-                    mode: 'lines',
-                    name: 'Acceleration X',
-                    line: { color: 'red' }
-                };
-                const traceY = {
-                    x: time,
-                    y: modifiedAccelerationY,
-                    mode: 'lines',
-                    name: 'Acceleration Y',
-                    line: { color: 'green' }
-                };
-                const traceZ = {
-                    x: time,
-                    y: modifiedAccelerationZ,
-                    mode: 'lines',
-                    name: 'Acceleration Z',
-                    line: { color: 'blue' }
-                };
-                const traceTemp = {
-                    x: time,
-                    y: temperature,
-                    mode: 'lines',
-                    name: 'Temperature',
-                    line: { color: 'orange' }
-                };
-                const traceVelX = {
-                    x: time,
-                    y: velocityZ,
-                    mode: 'lines',
-                    name: 'Velocity Z',
-                    line: { color: 'blue' }
-                };
-
-                // Create layout for the graph
-                // const traceP2P = {
-                //     x: peaksT,
-                //     y: peaks,
-                //     // mode: 'lines',
-                //     // name: 'Peak to Peak',
-                //     // line: { color: 'red' }
-
-                //     type: 'scatter',
-                //     mode: 'none', // Disable line connecting points
-                //     fill: 'tozeroy' // Fill area under curve
-                // };
-                const layout = {
-                    xaxis: {
-                        title: 'Time (milliseconds)',
-                        type: 'linear',
-                        //                 rangeslider: { // Add rangeslider for x-axis
-                        //   visible: true,
-                        //   step: 500 // Set the step size to 1000 units
-                        // },
-                        scaleanchor: 'y', // Anchor x-axis scale to y-axis scale
-                        scaleratio: 5 // Set the x-axis scale ratio to 500
-                    },
-                    yaxis: {
-                        title: 'mm/s2',
-                        // scaleanchor: 'x', // Anchor y-axis scale to x-axis scale,
-                        // scaleratio: 1
-                    },
-                    title: 'Acceleration'
-                };
-                // const layout2 = {
-                //     xaxis: {
-                //         title: 'Time (seconds)',
-                //         type: 'linear'
-                //     },
-                //     yaxis: {
-                //         title: 'mm/s2',
-                //         range: [-2000, 2000] // Set initial y-axis range
-                //     },
-                //     title: 'Peak to Peak'
-                // };
-                // Create layout for the graph
-                const layout1 = {
-                    xaxis: {
-                        title: 'Time (milliseconds)',
-                        type: 'linear',
-
-                        scaleanchor: 'y', // Anchor x-axis scale to y-axis scale
-                        scaleratio: 0.05 // Set the x-axis scale ratio to 500
-                    },
-                    yaxis: {
-                        title: 'mm/s',
-                        // scaleanchor: 'x', // Anchor y-axis scale to x-axis scale,
-                        // scaleratio: 1
-                    },
-                    title: 'Velocity',
-                    shapes: [] // Initialize an empty array to store shapes
-                };
-
-                // Add vertical lines for each index where Velocity is greater than 2.3
-                indices.forEach(idx => {
-                    const shape = {
-                        type: 'line',
-                        x0: time[idx],
-                        y0: -1500,
-                        x1: time[idx],
-                        y1: 1500, // Adjust the y-coordinate as needed
-                        line: {
-                            color: 'yellow',
-                            width: 1,
-                            dash: 'dashdot' // Set line dash style
-                        }
-                    };
-                    layout1.shapes.push(shape);
-                });
-
-                indicesR.forEach(idx => {
-                    const shape = {
-                        type: 'line',
-                        x0: time[idx],
-                        y0: -1500,
-                        x1: time[idx],
-                        y1: 1500, // Adjust the y-coordinate as needed
-                        line: {
-                            color: 'red',
-                            width: 2,
-                            dash: 'dashdot' // Set line dash style
-                        }
-                    };
-                    layout1.shapes.push(shape);
-                });
-                // Create layout for the graph
-                const layout0 = {
-                    xaxis: {
-                        title: 'Time (milliseconds)',
-                        type: 'linear'
-                    },
-                    yaxis: {
-                        title: '°C'
-                    },
-                    title: 'Temperature'
-                };
-                // Combine traces and layout, and plot the graph
-                Plotly.newPlot('graph', [traceX, traceY, traceZ], layout, { scrollZoom: true, });
-                Plotly.newPlot('graph0', [traceTemp], layout0, { scrollZoom: true, });
-                Plotly.newPlot('graph1', [traceVelX], layout1, { scrollZoom: true, });
-                // Plotly.newPlot('graph2', [traceP2P], layout2, { scrollZoom: true, });
-
-
-
-                // Get all anchor elements with href="https://plotly.com/"
-                const plotlyLinks = document.querySelectorAll('a[href="https://plotly.com/"]');
-
-                // Loop through each matching anchor element
-                plotlyLinks.forEach(link => {
-                    // Check if the parent element exists
-                    if (link.parentNode) {
-                        // Remove the parent element
-                        link.parentNode.remove();
-                    }
-                });
+                // Add the calculated velocity to the velocity array
+                velocityZ.push(currentVelocity);
             }
-            
-
-        // fetch('https://techelecon.github.io/2024-03-16-14_36.csv')
-        //     .then(response => response.text())
-        //     .then(csv => {
-        //         // Parse the CSV data
-        //         const data = Papa.parse(csv, { header: true }).data;
-
-
-        //         // Extract data for plotting
-        //         // const time = data.map(item => item.time);
-        //         // const accelerationX = data.map(item => item.accelerationX);
-        //         // const accelerationY = data.map(item => item.accelerationY);
-        //         // const accelerationZ = data.map(item => item.accelerationZ);
-        //         // const temperature = data.map(item => item.temperature);
-
-        //         // Extract data for plotting
-        //         const time = data.map(item => parseInt(item.Timestamp)); // Assuming 'time' is a column in your CSV
-        //         const accelerationX = data.map(item => parseFloat(item.AccelX)); // Assuming 'accelerationX' is a column in your CSV
-        //         const accelerationY = data.map(item => parseFloat(item.AccelY)); // Assuming 'accelerationY' is a column in your CSV
-        //         const accelerationZ = data.map(item => parseFloat(item.AccelZ)); // Assuming 'accelerationZ' is a column in your CSV
-        //         const temperature = data.map(item => parseFloat(item.Temperature)); // Assuming 'temperature' is a column in your CSV
+            const indicesR = [];
+            // Find indices where acceleration is greater than 2.3
+            const indices = velocityZ.reduce((acc, val, idx) => {
+                if (val > 2.3) {
+                    if (val > 4.5) {
+                        indicesR.push(idx);
+                    } else {
+                        acc.push(idx);
+                    }
+                }
+                return acc;
+            }, []);
 
 
-        //         // Calculate average values for each dataset
-        //         const calculateAverage = (values) => {
-        //             const validValues = values.filter(value => !isNaN(value));
-        //             return validValues.length > 0 ? validValues.reduce((acc, val) => (parseFloat(acc) + parseFloat(val)).toFixed(3), 0) / validValues.length : NaN;
-        //         };
-        //         const averageX = calculateAverage(accelerationX);
-        //         const averageY = calculateAverage(accelerationY);
-        //         const averageZ = calculateAverage(accelerationZ);
-        //         // Calculate average values for each dataset
+            // Create traces for each dataset
+            const traceX = {
+                x: time,
+                y: modifiedAccelerationX,
+                mode: 'lines',
+                name: 'Acceleration X',
+                line: { color: 'red' }
+            };
+            const traceY = {
+                x: time,
+                y: modifiedAccelerationY,
+                mode: 'lines',
+                name: 'Acceleration Y',
+                line: { color: 'green' }
+            };
+            const traceZ = {
+                x: time,
+                y: modifiedAccelerationZ,
+                mode: 'lines',
+                name: 'Acceleration Z',
+                line: { color: 'blue' }
+            };
+            const traceTemp = {
+                x: time,
+                y: temperature,
+                mode: 'lines',
+                name: 'Temperature',
+                line: { color: 'orange' }
+            };
+            const traceVelX = {
+                x: time,
+                y: velocityZ,
+                mode: 'lines',
+                name: 'Velocity Z',
+                line: { color: 'blue' }
+            };
+            const layout = {
+                xaxis: {
+                    title: 'Time (milliseconds)',
+                    type: 'linear',
+                    scaleanchor: 'y', // Anchor x-axis scale to y-axis scale
+                    scaleratio: 5 // Set the x-axis scale ratio to 500
+                },
+                yaxis: {
+                    title: 'mm/s2',
+                },
+                title: 'Acceleration'
+            };
+            const layout1 = {
+                xaxis: {
+                    title: 'Time (milliseconds)',
+                    type: 'linear',
 
-        //         // Subtract average value from each data point
-        //         const modifiedAccelerationX = accelerationX.map(val => (val - averageX.toFixed(3)) * 1000);
-        //         const modifiedAccelerationY = accelerationY.map(val => (val - averageY.toFixed(3)) * 1000);
-        //         const modifiedAccelerationZ = accelerationZ.map(val => (val - averageZ.toFixed(3)) * 1000);
+                    scaleanchor: 'y', // Anchor x-axis scale to y-axis scale
+                    scaleratio: 0.05 // Set the x-axis scale ratio to 500
+                },
+                yaxis: {
+                    title: 'mm/s',
+                    // scaleanchor: 'x', // Anchor y-axis scale to x-axis scale,
+                    // scaleratio: 1
+                },
+                title: 'Velocity',
+                shapes: [] // Initialize an empty array to store shapes
+            };
 
-        //         // Perform numerical integration to calculate velocity
-        //         let velocityZ = [0]; // Initialize velocity array with initial velocity as 0
-        //         for (let i = 1; i < time.length; i++) {
-        //             // Calculate the change in time
-        //             const dt = time[i] - time[i - 1];
+            // Add vertical lines for each index where Velocity is greater than 2.3
+            indices.forEach(idx => {
+                const shape = {
+                    type: 'line',
+                    x0: time[idx],
+                    y0: -1500,
+                    x1: time[idx],
+                    y1: 1500, // Adjust the y-coordinate as needed
+                    line: {
+                        color: 'yellow',
+                        width: 1,
+                        dash: 'dashdot' // Set line dash style
+                    }
+                };
+                layout1.shapes.push(shape);
+            });
 
-        //             // Calculate the area under the acceleration vs. time curve using the trapezoidal rule
-        //             const currentVelocity = modifiedAccelerationZ[i] * (dt / 1000);
-        //             // Calculate velocity by adding the area to the previous velocity
-        //             // const prevVelocity = velocityX[i - 1];
-        //             // const currentVelocity = prevVelocity + area;
-
-        //             // Add the calculated velocity to the velocity array
-        //             velocityZ.push(currentVelocity);
-        //         }
-        //         const indicesR = [];
-        //         // Find indices where acceleration is greater than 2.3
-        //         const indices = velocityZ.reduce((acc, val, idx) => {
-        //             if (val > 2.3) {
-        //                 if (val > 4.5) {
-        //                     indicesR.push(idx);
-        //                 } else {
-        //                     acc.push(idx);
-        //                 }
-        //             }
-        //             return acc;
-        //         }, []);
-
-
-        //         // Initialize variables
-        //         // const windowSize = 1000; // 1 second window size in milliseconds
-        //         // const peaks = [];
-        //         // const peaksT = [];
-        //         // j = 0;
-        //         // Iterate over the data in 1-second intervals
-        //         // for (let i = 0; i < time.length; i++) {
-        //         //     const startTime = time[i];
-        //         //     const endTime = startTime + windowSize;
-
-        //         //     let maxAcceleration = -Infinity;
-        //         //     let minAcceleration = Infinity;
-
-        //         //     // Find maximum and minimum acceleration within the window
-        //         //     while (time[i] <= endTime && i < time.length) {
-        //         //         maxAcceleration = Math.max(maxAcceleration, modifiedAccelerationX[i]);
-        //         //         minAcceleration = Math.min(minAcceleration, modifiedAccelerationX[i]);
-        //         //         i++;
-        //         //     }
-
-        //         //     // Calculate peak-to-peak value for the window
-        //         //     const peakToPeak = maxAcceleration - minAcceleration;
-
-        //         //     // Store peak-to-peak value and the corresponding time
-        //         //     peaks.push(peakToPeak);
-        //         //     j++;
-        //         //     peaksT.push(j);
-        //         // }
-        //         // Create traces for each dataset
-        //         const traceX = {
-        //             x: time,
-        //             y: modifiedAccelerationX,
-        //             mode: 'lines',
-        //             name: 'Acceleration X',
-        //             line: { color: 'red' }
-        //         };
-        //         const traceY = {
-        //             x: time,
-        //             y: modifiedAccelerationY,
-        //             mode: 'lines',
-        //             name: 'Acceleration Y',
-        //             line: { color: 'green' }
-        //         };
-        //         const traceZ = {
-        //             x: time,
-        //             y: modifiedAccelerationZ,
-        //             mode: 'lines',
-        //             name: 'Acceleration Z',
-        //             line: { color: 'blue' }
-        //         };
-        //         const traceTemp = {
-        //             x: time,
-        //             y: temperature,
-        //             mode: 'lines',
-        //             name: 'Temperature',
-        //             line: { color: 'orange' }
-        //         };
-        //         const traceVelX = {
-        //             x: time,
-        //             y: velocityZ,
-        //             mode: 'lines',
-        //             name: 'Velocity Z',
-        //             line: { color: 'blue' }
-        //         };
-
-        //         // Create layout for the graph
-        //         // const traceP2P = {
-        //         //     x: peaksT,
-        //         //     y: peaks,
-        //         //     // mode: 'lines',
-        //         //     // name: 'Peak to Peak',
-        //         //     // line: { color: 'red' }
-
-        //         //     type: 'scatter',
-        //         //     mode: 'none', // Disable line connecting points
-        //         //     fill: 'tozeroy' // Fill area under curve
-        //         // };
-        //         const layout = {
-        //             xaxis: {
-        //                 title: 'Time (milliseconds)',
-        //                 type: 'linear',
-        //                 //                 rangeslider: { // Add rangeslider for x-axis
-        //                 //   visible: true,
-        //                 //   step: 500 // Set the step size to 1000 units
-        //                 // },
-        //                 scaleanchor: 'y', // Anchor x-axis scale to y-axis scale
-        //                 scaleratio: 5 // Set the x-axis scale ratio to 500
-        //             },
-        //             yaxis: {
-        //                 title: 'mm/s2',
-        //                 // scaleanchor: 'x', // Anchor y-axis scale to x-axis scale,
-        //                 // scaleratio: 1
-        //             },
-        //             title: 'Acceleration'
-        //         };
-        //         // const layout2 = {
-        //         //     xaxis: {
-        //         //         title: 'Time (seconds)',
-        //         //         type: 'linear'
-        //         //     },
-        //         //     yaxis: {
-        //         //         title: 'mm/s2',
-        //         //         range: [-2000, 2000] // Set initial y-axis range
-        //         //     },
-        //         //     title: 'Peak to Peak'
-        //         // };
-        //         // Create layout for the graph
-        //         const layout1 = {
-        //             xaxis: {
-        //                 title: 'Time (milliseconds)',
-        //                 type: 'linear',
-
-        //                 scaleanchor: 'y', // Anchor x-axis scale to y-axis scale
-        //                 scaleratio: 0.05 // Set the x-axis scale ratio to 500
-        //             },
-        //             yaxis: {
-        //                 title: 'mm/s',
-        //                 // scaleanchor: 'x', // Anchor y-axis scale to x-axis scale,
-        //                 // scaleratio: 1
-        //             },
-        //             title: 'Velocity',
-        //             shapes: [] // Initialize an empty array to store shapes
-        //         };
-
-        //         // Add vertical lines for each index where Velocity is greater than 2.3
-        //         indices.forEach(idx => {
-        //             const shape = {
-        //                 type: 'line',
-        //                 x0: time[idx],
-        //                 y0: -1500,
-        //                 x1: time[idx],
-        //                 y1: 1500, // Adjust the y-coordinate as needed
-        //                 line: {
-        //                     color: 'yellow',
-        //                     width: 1,
-        //                     dash: 'dashdot' // Set line dash style
-        //                 }
-        //             };
-        //             layout1.shapes.push(shape);
-        //         });
-
-        //         indicesR.forEach(idx => {
-        //             const shape = {
-        //                 type: 'line',
-        //                 x0: time[idx],
-        //                 y0: -1500,
-        //                 x1: time[idx],
-        //                 y1: 1500, // Adjust the y-coordinate as needed
-        //                 line: {
-        //                     color: 'red',
-        //                     width: 2,
-        //                     dash: 'dashdot' // Set line dash style
-        //                 }
-        //             };
-        //             layout1.shapes.push(shape);
-        //         });
-        //         // Create layout for the graph
-        //         const layout0 = {
-        //             xaxis: {
-        //                 title: 'Time (milliseconds)',
-        //                 type: 'linear'
-        //             },
-        //             yaxis: {
-        //                 title: '°C'
-        //             },
-        //             title: 'Temperature'
-        //         };
-        //         // Combine traces and layout, and plot the graph
-        //         Plotly.newPlot('graph', [traceX, traceY, traceZ], layout, { scrollZoom: true, });
-        //         Plotly.newPlot('graph0', [traceTemp], layout0, { scrollZoom: true, });
-        //         Plotly.newPlot('graph1', [traceVelX], layout1, { scrollZoom: true, });
-        //         // Plotly.newPlot('graph2', [traceP2P], layout2, { scrollZoom: true, });
+            indicesR.forEach(idx => {
+                const shape = {
+                    type: 'line',
+                    x0: time[idx],
+                    y0: -1500,
+                    x1: time[idx],
+                    y1: 1500, // Adjust the y-coordinate as needed
+                    line: {
+                        color: 'red',
+                        width: 2,
+                        dash: 'dashdot' // Set line dash style
+                    }
+                };
+                layout1.shapes.push(shape);
+            });
+            // Create layout for the graph
+            const layout0 = {
+                xaxis: {
+                    title: 'Time (milliseconds)',
+                    type: 'linear'
+                },
+                yaxis: {
+                    title: '°C'
+                },
+                title: 'Temperature'
+            };
+            // Combine traces and layout, and plot the graph
+            Plotly.newPlot('graph', [traceX, traceY, traceZ], layout, { scrollZoom: true, });
+            Plotly.newPlot('graph0', [traceTemp], layout0, { scrollZoom: true, });
+            Plotly.newPlot('graph1', [traceVelX], layout1, { scrollZoom: true, });
+            // Plotly.newPlot('graph2', [traceP2P], layout2, { scrollZoom: true, });
 
 
 
-        //         // Get all anchor elements with href="https://plotly.com/"
-        //         const plotlyLinks = document.querySelectorAll('a[href="https://plotly.com/"]');
+            // Get all anchor elements with href="https://plotly.com/"
+            const plotlyLinks = document.querySelectorAll('a[href="https://plotly.com/"]');
 
-        //         // Loop through each matching anchor element
-        //         plotlyLinks.forEach(link => {
-        //             // Check if the parent element exists
-        //             if (link.parentNode) {
-        //                 // Remove the parent element
-        //                 link.parentNode.remove();
-        //             }
-        //         });
-        //     })
-        //     .catch(error => {
-        //         console.error('Error fetching or parsing CSV file:', error);
-        //     });
+            // Loop through each matching anchor element
+            plotlyLinks.forEach(link => {
+                // Check if the parent element exists
+                if (link.parentNode) {
+                    // Remove the parent element
+                    link.parentNode.remove();
+                }
+            });
+        }
 
 
     </script>
