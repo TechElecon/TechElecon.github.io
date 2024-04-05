@@ -543,6 +543,68 @@
 
 
     </script>
+    
+<script>
+    const dropArea = document.getElementById('csv-file');
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false)
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight(e) {
+        dropArea.classList.add('highlight');
+    }
+
+    function unhighlight(e) {
+        dropArea.classList.remove('highlight');
+    }
+
+    dropArea.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+        let dt = e.dataTransfer;
+        let files = dt.files;
+        let url = dt.getData('URL');
+
+        if (files.length > 0) {
+            handleFiles(files);
+        } else if (url) {
+            fetchCSV(url);
+            handleURL(url);
+        }
+    }
+
+    function handleFiles(file) {
+
+        if (file.type === 'text/csv') {
+                // File is CSV, you can handle it here
+                parseCSV(file);
+            } else {
+                alert('Unsupported file type:');
+            }
+    }
+
+
+    // If file is selected through file dialog
+    const fileInput = document.getElementById('csv-file');
+    fileInput.addEventListener('change', function () {
+        handleFiles(this.files);
+    });
+
+</script>
 </body>
 
 </html>
