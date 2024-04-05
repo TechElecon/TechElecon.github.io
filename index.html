@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -359,6 +360,30 @@
                 // Add the calculated velocity to the velocity array
                 velocityZ.push(currentVelocity);
             }
+            let velocityY = [0]; // Initialize velocity array with initial velocity as 0
+            for (let i = 1; i < time.length; i++) {
+                // Calculate the change in time
+                const dt = time[i] - time[i - 1];
+
+                // Calculate the area under the acceleration vs. time curve using the trapezoidal rule
+                const currentVelocity = modifiedAccelerationY[i] * (dt / 1000);
+
+                // Add the calculated velocity to the velocity array
+                velocityY.push(currentVelocity);
+            }
+            let velocityX = [0]; // Initialize velocity array with initial velocity as 0
+            for (let i = 1; i < time.length; i++) {
+                // Calculate the change in time
+                const dt = time[i] - time[i - 1];
+
+                // Calculate the area under the acceleration vs. time curve using the trapezoidal rule
+                const currentVelocity = modifiedAccelerationX[i] * (dt / 1000);
+
+                // Add the calculated velocity to the velocity array
+                velocityX.push(currentVelocity);
+            }
+
+
             const indicesR = [];
             // Find indices where acceleration is greater than 2.3
             const indices = velocityZ.reduce((acc, val, idx) => {
@@ -403,6 +428,20 @@
                 line: { color: 'orange' }
             };
             const traceVelX = {
+                x: time,
+                y: velocityX,
+                mode: 'lines',
+                name: 'Velocity X',
+                line: { color: 'red' }
+            };
+            const traceVelY = {
+                x: time,
+                y: velocityY,
+                mode: 'lines',
+                name: 'Velocity Y',
+                line: { color: 'green' }
+            };
+            const traceVelZ = {
                 x: time,
                 y: velocityZ,
                 mode: 'lines',
@@ -484,7 +523,7 @@
             // Combine traces and layout, and plot the graph
             Plotly.newPlot('graph', [traceX, traceY, traceZ], layout, { scrollZoom: true, });
             Plotly.newPlot('graph0', [traceTemp], layout0, { scrollZoom: true, });
-            Plotly.newPlot('graph1', [traceVelX], layout1, { scrollZoom: true, });
+            Plotly.newPlot('graph1', [traceVelX,traceVelY,traceVelZ], layout1, { scrollZoom: true, });
             // Plotly.newPlot('graph2', [traceP2P], layout2, { scrollZoom: true, });
 
 
