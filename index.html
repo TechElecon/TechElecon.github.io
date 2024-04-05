@@ -162,13 +162,13 @@
             .title {
                 font-size: 1.2rem;
             }
-
+/* 
             #csv-file{
                 right: 0;
                 position: absolute;
                 top: 0;
-            }
-            .custom-button {
+            } */
+            #custom-button {
                 position: absolute;
                 top: 0;
                 right: 0;
@@ -185,13 +185,10 @@
         
 /* Style for the file input */
 #csv-file{
-    height: 40px;
-    width: 100px;
-    opacity: 0;
-    cursor: pointer;
+    display:none;
 }
 /* Style for the button */
-.custom-button {
+#custom-button {
   padding: 10px 20px;
   border: none; 
   cursor: pointer;
@@ -213,7 +210,7 @@
         <!-- <h1 class="title">2024-03-16-14_36.csv (2.5 Minutes)</h1> -->
         <div>
             <input type="file" id="csv-file" accept=".csv">
-            <label for="csv-file" class="custom-button">Drop the File</label>
+            <label for="csv-file" id="custom-button">Drop the File</label>
         </div>
         <button class="toggle-btn">
             <span class="bar"></span>
@@ -308,7 +305,7 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             // Get the file input element
-            var fileInput = document.getElementById('csv-file');
+            var fileInput = document.getElementById('custom-button');
 
             // Add event listener for when a file is selected
             fileInput.addEventListener('change', function (event) {
