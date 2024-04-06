@@ -598,7 +598,7 @@
     }
 
     function handleFiles(file) {
-    if (file.type === 'text/csv') {
+    if (file) {
         const reader = new FileReader();
         reader.onload = function (event) {
             const csvData = event.target.result;
