@@ -598,13 +598,13 @@
     }
 
     function handleFiles(file) {
-    if (file) {
+    if (file[0]) {
         const reader = new FileReader();
         reader.onload = function (event) {
             const csvData = event.target.result;
             parseCSV(csvData);
         };
-        reader.readAsText(file);
+        reader.readAsText(file[0]);
     }
 }
 
