@@ -597,17 +597,19 @@
         }
     }
 
-    function handleFiles(files) {
-    if (files.length > 0) {
-        const file = files[0]; // Access the first file
-        if (file.type === 'text/csv') {
-            // File is CSV, you can handle it here
-            parseCSV(file);
-        } else {
-            alert('Unsupported file type: ' + file.type);
-        }
+    function handleFiles(file) {
+    if (file.type === 'text/csv') {
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            const csvData = event.target.result;
+            parseCSV(csvData);
+        };
+        reader.readAsText(file);
+    } else {
+        alert('Unsupported file type: ' + file.type);
     }
 }
+
 
     // If file is selected through file dialog
     const fileInput = document.getElementById('csv-file');
