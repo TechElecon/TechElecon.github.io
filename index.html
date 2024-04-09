@@ -394,18 +394,18 @@
             }
 
 
-            const indicesR = [];
-            // Find indices where acceleration is greater than 2.3
-            const indices = velocityZ.reduce((acc, val, idx) => {
-                if (val > 2.3) {
-                    if (val > 4.5) {
-                        indicesR.push(idx);
-                    } else {
-                        acc.push(idx);
-                    }
-                }
-                return acc;
-            }, []);
+            // const indicesR = [];
+            // // Find indices where acceleration is greater than 2.3
+            // const indices = velocityZ.reduce((acc, val, idx) => {
+            //     if (val > 2.3) {
+            //         if (val > 4.5) {
+            //             indicesR.push(idx);
+            //         } else {
+            //             acc.push(idx);
+            //         }
+            //     }
+            //     return acc;
+            // }, []);
 
 
             // Create traces for each dataset
@@ -488,37 +488,37 @@
             };
 
             // Add vertical lines for each index where Velocity is greater than 2.3
-            indices.forEach(idx => {
-                const shape = {
-                    type: 'line',
-                    x0: time[idx],
-                    y0: -1500,
-                    x1: time[idx],
-                    y1: 1500, // Adjust the y-coordinate as needed
-                    line: {
-                        color: 'yellow',
-                        width: 1,
-                        dash: 'dashdot' // Set line dash style
-                    }
-                };
-                layout1.shapes.push(shape);
-            });
+            // indices.forEach(idx => {
+            //     const shape = {
+            //         type: 'line',
+            //         x0: time[idx],
+            //         y0: -1500,
+            //         x1: time[idx],
+            //         y1: 1500, // Adjust the y-coordinate as needed
+            //         line: {
+            //             color: 'yellow',
+            //             width: 1,
+            //             dash: 'dashdot' // Set line dash style
+            //         }
+            //     };
+            //     layout1.shapes.push(shape);
+            // });
 
-            indicesR.forEach(idx => {
-                const shape = {
-                    type: 'line',
-                    x0: time[idx],
-                    y0: -1500,
-                    x1: time[idx],
-                    y1: 1500, // Adjust the y-coordinate as needed
-                    line: {
-                        color: 'red',
-                        width: 2,
-                        dash: 'dashdot' // Set line dash style
-                    }
-                };
-                layout1.shapes.push(shape);
-            });
+            // indicesR.forEach(idx => {
+            //     const shape = {
+            //         type: 'line',
+            //         x0: time[idx],
+            //         y0: -1500,
+            //         x1: time[idx],
+            //         y1: 1500, // Adjust the y-coordinate as needed
+            //         line: {
+            //             color: 'red',
+            //             width: 2,
+            //             dash: 'dashdot' // Set line dash style
+            //         }
+            //     };
+            //     layout1.shapes.push(shape);
+            // });
             // Create layout for the graph
             const layout0 = {
                 xaxis: {
