@@ -201,7 +201,7 @@ body{
     background-color: darkgray; /* Dark blue */
 }
 #popup{
-    display: block;
+    display: none;
     z-index: 4; /* Sit on top */
   width: 100%; /* Full width */
   height: 100%; /* Full height */
