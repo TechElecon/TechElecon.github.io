@@ -209,7 +209,6 @@ body{
   position: fixed; /* Stay in place */
     justify-content: center;
     align-items: center;
-    padding: 10px;
 }
 #popup-buttons{
 display: flex;
