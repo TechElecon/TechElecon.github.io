@@ -205,9 +205,6 @@ body{
     z-index: 4; /* Sit on top */
   width: 100%; /* Full width */
   height: 100%; /* Full height */
-  top: calc(50% - 185px);
-  left: calc(50% - 15px);
-  position: fixed; /* Stay in place */
   overflow: auto; /* Enable scroll if needed */
     justify-content: center;
     align-items: center;
