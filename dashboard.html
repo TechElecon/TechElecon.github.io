@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="dashboard_style.css">
+</head>
+<body>
+    <div id="parent-bar">
+        <div id="logo">
+            <b id="logo-text">TECH ELECON</b>
+        </div>
+        <div id="add-device">
+            <button id="add">Add Device</button>
+        </div>
+
+    </div>
+    <div id="main">
+        <div class="grid-container">
+            <div class="grid-item">
+                <b style="text-align: start;font-family: monospace;" class="sr_num">0123456789abcdef</b>
+                <h4 class="location">Anand, Gujarat</h4>
+                <p style="color: red;font-family: monospace;" class="status">offline</p>
+            </div>
+            <div class="grid-item">
+                hello
+            </div>
+            <div class="grid-item">
+                hello
+            </div>
+            <div class="grid-item">
+                hello
+            </div>
+        </div>
+    </div>
+    <div id="popup">
+
+    <div class="add-device-container">
+        <h2>Add Device</h2>
+        <form action="/login" method="POST">
+            <label for="sr_num">Device SR NO.</label>
+            <input type="text" id="sr_num-input" name="sr_num" required>
+            
+            <label for="location">Location</label>
+            <input type="text" id="location-input" name="location" required>
+            
+            <div id="popup-buttons">
+            <button id="add-btn" type="submit">Add</button>
+            <button id="cancel" type="button">Close</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    document.getElementById("cancel").addEventListener("click", dismiss);
+    document.getElementById("add-device").addEventListener("click", openPopup);
+
+function dismiss() {
+    document.getElementById("popup").style.display = "none";
+}
+function openPopup(){
+    document.getElementById("popup").style.display = "block";
+}
+</script>
+</body>
+</html>
