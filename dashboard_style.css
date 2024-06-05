@@ -201,12 +201,12 @@ body{
     background-color: darkgray; /* Dark blue */
 }
 #popup{
-    display: flex;
+    display: none;
     z-index: 4; /* Sit on top */
   width: 100%; /* Full width */
   height: 100%; /* Full height */
-  position: fixed; /* Stay in place */
   overflow: auto; /* Enable scroll if needed */
+  position: fixed; /* Stay in place */
     justify-content: center;
     align-items: center;
 }
