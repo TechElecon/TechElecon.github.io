@@ -86,7 +86,7 @@ body{
         /* padding: 10px; */
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
     }
-
+    
 }
 #main{
     background-color: #f2f2f2;
@@ -201,17 +201,14 @@ body{
     background-color: darkgray; /* Dark blue */
 }
 #popup{
-    display: block;
+    display: flex;
     z-index: 4; /* Sit on top */
   width: 100%; /* Full width */
   height: 100%; /* Full height */
-  top: calc(50% - 185px);
-  left: calc(50% - 15px);
   position: fixed; /* Stay in place */
   overflow: auto; /* Enable scroll if needed */
     justify-content: center;
     align-items: center;
-    padding: 10px;
 }
 #popup-buttons{
 display: flex;

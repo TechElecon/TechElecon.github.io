@@ -1,0 +1,621 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gearbox Vibration Analysis</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <!-- Include PapaParse -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+
+    <style>
+        html {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+
+            height: 100%;
+            width: 100%;
+            position: relative;
+        }
+
+        #graph {
+            width: 100%;
+            height: 100%;
+        }
+
+        .title-bar {
+            background-color: #333;
+            color: #fff;
+            /* padding: 10px 20px; */
+            height: 40px;
+            display: flex;
+            align-items: start;
+            align-items: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+
+            z-index: 5;
+            /* Ensure title bar is behind the panel */
+        }
+
+        .title {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .sidebar {
+            height: 100%;
+            width: 200px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            background-color: #f3f3f3;
+            padding-top: 60px;
+            /* Adjusted for title bar height */
+            overflow-y: auto;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .sidebar a {
+            padding: 10px 20px;
+            display: block;
+            color: #333;
+            text-decoration: none;
+            border-bottom: 1px solid #ddd;
+            cursor: pointer;
+        }
+
+        .sidebar a:hover {
+            background-color: #ddd;
+        }
+
+        .content {
+            margin-left: 200px;
+            position: fixed;
+            height: 100%;
+            width: 100%;
+            z-index: 4;
+            /* Adjusted for title bar height */
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        @media screen and (max-width: 600px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .content {
+                margin-left: 0;
+                height: 100%;
+                width: 100%;
+                z-index: 0;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+                z-index: 1;
+            }
+
+            .toggle-btn {
+                display: block;
+                background: none;
+                border: none;
+                position: fixed;
+                top: auto;
+                left: 10px;
+                cursor: pointer;
+                color: rgba(255, 255, 255, 0.7);
+                /* Lighter color for the icon */
+            }
+
+            .toggle-btn .bar {
+                display: block;
+                width: 25px;
+                height: 3px;
+                position: relative;
+                z-index: 3;
+                background-color: #fff;
+                margin: 5px 0;
+                transition: transform 0.3s ease-in-out;
+            }
+
+            /* .toggle-btn {
+                display: block;
+                position: fixed;
+                top: 10px;
+                left: 10px;
+                background: none;
+                border: none;
+                cursor: pointer;
+            } */
+
+
+            .toggle-btn.active .bar:nth-child(1) {
+                transform: translateY(8px) rotate(45deg);
+            }
+
+            .toggle-btn.active .bar:nth-child(2) {
+                opacity: 0;
+            }
+
+            .toggle-btn.active .bar:nth-child(3) {
+                transform: translateY(-8px) rotate(-45deg);
+            }
+
+            .title {
+                font-size: 1.2rem;
+            }
+/* 
+            #csv-file{
+                right: 0;
+                position: absolute;
+                top: 0;
+            } */
+            #custom-button {
+                position: absolute;
+                top: 0;
+                right: 0;
+            }
+        }
+
+        @media screen and (min-width: 601px) {
+            .toggle-btn {
+                display: none;
+                /* Hide the toggle button on desktops */
+            }
+
+        }
+        
+/* Style for the file input */
+#csv-file{
+    display:none;
+}
+/* Style for the button */
+#custom-button {
+  padding: 10px 20px;
+  border: none; 
+  cursor: pointer;
+}
+
+    </style>
+</head>
+
+<body>
+    <div class="sidebar" id="sidebar">
+        <a id="files-">Files</a>
+        <a id="velocity-">Velocity</a>
+        <a id="acceleration-">Acceleration</a>
+        <!-- <a id="peak-to-peak-">Peak to Peak</a> -->
+        <a id="temperature-">Temperature</a>
+    </div>
+
+    <div class="title-bar">
+        <!-- <h1 class="title">2024-03-16-14_36.csv (2.5 Minutes)</h1> -->
+        <div>
+            <input type="file" id="csv-file" accept=".csv">
+            <label for="csv-file" id="custom-button">Drop the File</label>
+        </div>
+        <button class="toggle-btn">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </button>
+    </div>
+
+    <div class="content" id="files">
+        <iframe style="border:none;" id="files0" src="https://techelecon.github.io/files"></iframe>
+    </div>
+
+    <div class="content" id="velocity">
+        <div id="graph1"></div>
+    </div>
+
+    <div class="content" id="acceleration">
+        <!-- Content for acceleration page -->
+        <div id="graph"></div>
+    </div>
+
+    <!-- <div class="content" id="peak-to-peak">
+        <div id="graph2"></div>
+    </div> -->
+
+    <div class="content" id="temperature">
+        <div id="graph0"></div>
+    </div>
+
+
+    <script>
+        function toggleSidebar() {
+            var sidebar = document.getElementById("sidebar");
+            var toggleBtn = document.querySelector(".toggle-btn");
+            sidebar.classList.toggle("active");
+            toggleBtn.classList.toggle("active");
+        }
+        var onceg = true;
+        function showContent(contentId) {
+            var contents = document.querySelectorAll(".content");
+            contents.forEach(function (content) {
+                if (content.id === contentId.slice(0, -1)) {
+                    content.style.display = "block"; // Show the selected content
+                    var titleBarHeight = document.querySelector(".title-bar");
+                    content.style.paddingTop = titleBarHeight.offsetHeight + "px";
+                    if (onceg) {
+
+                        document.getElementById('graph').style.height = (document.getElementById('graph').offsetHeight - document.querySelector(".title-bar").offsetHeight) + "px";
+                        if (window.innerWidth <= 600) {
+                            document.getElementById('graph').style.width = (document.getElementById('graph').offsetWidth) + "px";
+                        }else{
+                            document.getElementById('graph').style.width = (document.getElementById('graph').offsetWidth - document.getElementById('sidebar').offsetWidth) + "px";
+                        }
+                        Plotly.Plots.resize('graph');
+                        document.getElementById('graph0').style.height = document.getElementById('graph').offsetHeight + "px";
+                        document.getElementById('graph0').style.width = document.getElementById('graph').offsetWidth + "px";
+                        Plotly.Plots.resize('graph0');
+                        document.getElementById('graph1').style.height = document.getElementById('graph').offsetHeight + "px";
+                        document.getElementById('graph1').style.width = document.getElementById('graph').offsetWidth + "px";
+                        Plotly.Plots.resize('graph1');
+                        document.getElementById('files0').style.height = document.getElementById('graph').offsetHeight + "px";
+                        document.getElementById('files0').style.width = document.getElementById('graph').offsetWidth + "px";
+                        Plotly.Plots.resize('files0');
+
+                        onceg = false;
+                    }
+                } else {
+                    content.style.display = "none"; // Hide other contents
+                }
+            });
+        }
+        showContent("files-");
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // Add event listeners to sidebar links
+            var links = document.querySelectorAll(".sidebar a");
+            links.forEach(function (link) {
+                link.addEventListener("click", function (event) {
+                    event.preventDefault(); // Prevent default link behavior
+                    showContent(link.id); // Extract ID and show corresponding content
+                });
+            });
+
+            // Add event listener to toggle button
+            var toggleBtn = document.querySelector(".toggle-btn");
+            toggleBtn.addEventListener("click", function () {
+                toggleSidebar();
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Get the file input element
+            var fileInput = document.getElementById('custom-button');
+
+            // Add event listener for when a file is selected
+            fileInput.addEventListener('change', function (event) {
+                // Get the selected file
+                var file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (event) {
+                        const csvData = event.target.result;
+                        parseCSV(csvData);
+                    };
+                    reader.readAsText(file);
+                }
+                showContent("velocity-")
+            });
+        });
+
+        function fetchCSV(url) {
+            fetch(url)
+                .then(response => response.text())
+                .then(csv => parseCSV(csv))
+                .catch(error => console.error('Error fetching CSV:', error));
+        }
+
+        function parseCSV(csv) {
+                        showContent("velocity-");
+            // Parse the CSV data
+            const data = Papa.parse(csv, { header: true }).data;
+
+            // Extract data for plotting
+            const time = data.map(item => parseInt(item.Timestamp)); // Assuming 'time' is a column in your CSV
+            const accelerationX = data.map(item => parseFloat(item.AccelX)); // Assuming 'accelerationX' is a column in your CSV
+            const accelerationY = data.map(item => parseFloat(item.AccelY)); // Assuming 'accelerationY' is a column in your CSV
+            const accelerationZ = data.map(item => parseFloat(item.AccelZ)); // Assuming 'accelerationZ' is a column in your CSV
+            const temperature = data.map(item => parseFloat(item.Temperature)); // Assuming 'temperature' is a column in your CSV
+
+
+            // Calculate average values for each dataset
+            const calculateAverage = (values) => {
+                const validValues = values.filter(value => !isNaN(value));
+                return validValues.length > 0 ? validValues.reduce((acc, val) => (parseFloat(acc) + parseFloat(val)).toFixed(3), 0) / validValues.length : NaN;
+            };
+            const averageX = calculateAverage(accelerationX);
+            const averageY = calculateAverage(accelerationY);
+            const averageZ = calculateAverage(accelerationZ);
+            // Calculate average values for each dataset
+
+            // Subtract average value from each data point
+            const modifiedAccelerationX = accelerationX.map(val => (val - averageX.toFixed(3)) * 1000);
+            const modifiedAccelerationY = accelerationY.map(val => (val - averageY.toFixed(3)) * 1000);
+            const modifiedAccelerationZ = accelerationZ.map(val => (val - averageZ.toFixed(3)) * 1000);
+
+            // Perform numerical integration to calculate velocity
+            let velocityZ = [0]; // Initialize velocity array with initial velocity as 0
+            for (let i = 1; i < time.length; i++) {
+                // Calculate the change in time
+                const dt = time[i] - time[i - 1];
+
+                // Calculate the area under the acceleration vs. time curve using the trapezoidal rule
+                const currentVelocity = modifiedAccelerationZ[i] * (dt / 1000);
+
+                // Add the calculated velocity to the velocity array
+                velocityZ.push(currentVelocity);
+            }
+            let velocityY = [0]; // Initialize velocity array with initial velocity as 0
+            for (let i = 1; i < time.length; i++) {
+                // Calculate the change in time
+                const dt = time[i] - time[i - 1];
+
+                // Calculate the area under the acceleration vs. time curve using the trapezoidal rule
+                const currentVelocity = modifiedAccelerationY[i] * (dt / 1000);
+
+                // Add the calculated velocity to the velocity array
+                velocityY.push(currentVelocity);
+            }
+            let velocityX = [0]; // Initialize velocity array with initial velocity as 0
+            for (let i = 1; i < time.length; i++) {
+                // Calculate the change in time
+                const dt = time[i] - time[i - 1];
+
+                // Calculate the area under the acceleration vs. time curve using the trapezoidal rule
+                const currentVelocity = modifiedAccelerationX[i] * (dt / 1000);
+
+                // Add the calculated velocity to the velocity array
+                velocityX.push(currentVelocity);
+            }
+
+
+            // const indicesR = [];
+            // // Find indices where acceleration is greater than 2.3
+            // const indices = velocityZ.reduce((acc, val, idx) => {
+            //     if (val > 2.3) {
+            //         if (val > 4.5) {
+            //             indicesR.push(idx);
+            //         } else {
+            //             acc.push(idx);
+            //         }
+            //     }
+            //     return acc;
+            // }, []);
+
+
+            // Create traces for each dataset
+            const traceX = {
+                x: time,
+                y: modifiedAccelerationX,
+                mode: 'lines',
+                name: 'Acceleration X',
+                line: { color: 'red' }
+            };
+            const traceY = {
+                x: time,
+                y: modifiedAccelerationY,
+                mode: 'lines',
+                name: 'Acceleration Y',
+                line: { color: 'green' }
+            };
+            const traceZ = {
+                x: time,
+                y: modifiedAccelerationZ,
+                mode: 'lines',
+                name: 'Acceleration Z',
+                line: { color: 'blue' }
+            };
+            const traceTemp = {
+                x: time,
+                y: temperature,
+                mode: 'lines',
+                name: 'Temperature',
+                line: { color: 'orange' }
+            };
+            const traceVelX = {
+                x: time,
+                y: velocityX,
+                mode: 'lines',
+                name: 'Velocity X',
+                line: { color: 'red' }
+            };
+            const traceVelY = {
+                x: time,
+                y: velocityY,
+                mode: 'lines',
+                name: 'Velocity Y',
+                line: { color: 'green' }
+            };
+            const traceVelZ = {
+                x: time,
+                y: velocityZ,
+                mode: 'lines',
+                name: 'Velocity Z',
+                line: { color: 'blue' }
+            };
+            const layout = {
+                xaxis: {
+                    title: 'Time (milliseconds)',
+                    type: 'linear',
+                    scaleanchor: 'y', // Anchor x-axis scale to y-axis scale
+                    scaleratio: 5 // Set the x-axis scale ratio to 500
+                },
+                yaxis: {
+                    title: 'mm/s2',
+                },
+                title: 'Acceleration'
+            };
+            const layout1 = {
+                xaxis: {
+                    title: 'Time (milliseconds)',
+                    type: 'linear',
+
+                    scaleanchor: 'y', // Anchor x-axis scale to y-axis scale
+                    scaleratio: 0.05 // Set the x-axis scale ratio to 500
+                },
+                yaxis: {
+                    title: 'mm/s',
+                    // scaleanchor: 'x', // Anchor y-axis scale to x-axis scale,
+                    // scaleratio: 1
+                },
+                title: 'Velocity',
+                shapes: [] // Initialize an empty array to store shapes
+            };
+
+            // Add vertical lines for each index where Velocity is greater than 2.3
+            // indices.forEach(idx => {
+            //     const shape = {
+            //         type: 'line',
+            //         x0: time[idx],
+            //         y0: -1500,
+            //         x1: time[idx],
+            //         y1: 1500, // Adjust the y-coordinate as needed
+            //         line: {
+            //             color: 'yellow',
+            //             width: 1,
+            //             dash: 'dashdot' // Set line dash style
+            //         }
+            //     };
+            //     layout1.shapes.push(shape);
+            // });
+
+            // indicesR.forEach(idx => {
+            //     const shape = {
+            //         type: 'line',
+            //         x0: time[idx],
+            //         y0: -1500,
+            //         x1: time[idx],
+            //         y1: 1500, // Adjust the y-coordinate as needed
+            //         line: {
+            //             color: 'red',
+            //             width: 2,
+            //             dash: 'dashdot' // Set line dash style
+            //         }
+            //     };
+            //     layout1.shapes.push(shape);
+            // });
+            // Create layout for the graph
+            const layout0 = {
+                xaxis: {
+                    title: 'Time (milliseconds)',
+                    type: 'linear'
+                },
+                yaxis: {
+                    title: '°C'
+                },
+                title: 'Temperature'
+            };
+            // Combine traces and layout, and plot the graph
+            Plotly.newPlot('graph', [traceX, traceY, traceZ], layout, { scrollZoom: true, });
+            Plotly.newPlot('graph0', [traceTemp], layout0, { scrollZoom: true, });
+            Plotly.newPlot('graph1', [traceVelX,traceVelY,traceVelZ], layout1, { scrollZoom: true, });
+            // Plotly.newPlot('graph2', [traceP2P], layout2, { scrollZoom: true, });
+
+
+
+            // Get all anchor elements with href="https://plotly.com/"
+            const plotlyLinks = document.querySelectorAll('a[href="https://plotly.com/"]');
+
+            // Loop through each matching anchor element
+            plotlyLinks.forEach(link => {
+                // Check if the parent element exists
+                if (link.parentNode) {
+                    // Remove the parent element
+                    link.parentNode.remove();
+                }
+            });
+        }
+
+
+    </script>
+    
+<script>
+    const dropArea = document.getElementById('custom-button');
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false)
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight(e) {
+        dropArea.classList.add('highlight');
+    }
+
+    function unhighlight(e) {
+        dropArea.classList.remove('highlight');
+    }
+
+    dropArea.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+        let dt = e.dataTransfer;
+        let files = dt.files;
+        let url = dt.getData('URL');
+
+        if (files.length > 0) {
+            handleFiles(files);
+        } else if (url) {
+            fetchCSV(url);
+            handleURL(url);
+        }
+    }
+
+    function handleFiles(file) {
+    if (file[0]) {
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            const csvData = event.target.result;
+            parseCSV(csvData);
+        };
+        reader.readAsText(file[0]);
+    }
+}
+
+
+    // If file is selected through file dialog
+    const fileInput = document.getElementById('csv-file');
+    fileInput.addEventListener('change', function () {
+        handleFiles(this.files);
+    });
+
+</script>
+</body>
+
+</html>

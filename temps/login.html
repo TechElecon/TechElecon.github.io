@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <!-- Add Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js'
+        // Replace with your Firebase project configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCz7umEsmGFPyjfb3_tqYrtqmaDnnGmc5U",
+            authDomain: "datademo-72ee9.firebaseapp.com",
+            projectId: "datademo-72ee9",
+            storageBucket: "datademo-72ee9.appspot.com",
+            messagingSenderId: "1009601807021",
+            appId: "1:1009601807021:web:5fa3a7fba3984eeee57c24"
+        };
+
+        // Initialize Firebase
+        const firebaseApp = initializeApp(firebaseConfig);
+        const auth = getAuth(firebaseApp);
+        const database = getDatabase(firebaseApp);
+
+        const displayErrorAlert = (errorMessage) => {
+            alert(`Error: ${errorMessage}`);
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Redirect to the homepage if the user is already authenticated
+                window.location.href = 'https://techelecon.github.io/temps';
+            }else{
+             document.getElementById("loginPopup").style.display = "block";
+            }
+        });
+
+        // Function to handle form submissions
+        const handleFormSubmit = (formId, submitCallback) => {
+            document.getElementById(formId).addEventListener('submit', async function (event) {
+                event.preventDefault(); try {
+                    await submitCallback();
+                } catch (error) {
+                    displayErrorAlert(error.message);
+                }
+            });
+        };
+
+        // Login form submission
+        handleFormSubmit('loginForm', async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                console.log('User logged in:', userCredential.user);
+                localStorage.setItem('userToken', userCredential.user.accessToken);
+                window.location.href = 'https://techelecon.github.io/temps/files';
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+
+
+
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f2f2f2;
+        }
+
+        #openLoginPopup {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #loginPopup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin-top: 0;
+            text-align: center;
+        }
+
+        form {
+            width: 250px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        label {
+            margin-bottom: 5px;
+        }
+
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button[type="submit"] {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div id="loginPopup">
+        <h1>Login</h1>
+        <form id="loginForm">
+            <div style="width: 100%;">
+                <label for="email">Id:<br/></label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div style="width: 100%;">
+                <label for="password">Password:<br/></label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+</body>
+
+</html>

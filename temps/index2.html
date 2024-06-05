@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Realtime Data Graph</title>
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        canvas {
+            width: 100%;
+            padding-bottom: 3%;
+        }
+
+        .info-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .datafiles,
+        .toggledark {
+            cursor: pointer;
+        }
+
+        .dark-mode {
+            background: #333;
+            color: #fff;
+        }
+
+
+    /* Style for the transparent div */
+    .transparent-div {
+      position: absolute;
+      width: auto;
+      background: none;
+    }
+
+    /* Style for the grey text */
+    /* .grey-text {
+      color: grey;
+    } */
+
+    /* Style for the main content */
+    .main-content {
+      padding: 20px;
+    }
+        
+        .popup-container {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .popup-content {
+            margin-bottom: 20px;
+        }
+
+        .close-btn {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .read-more-btn {
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+        <div class="popup-container" id="popupContainer">
+        <div class="popup-content">
+            <p>
+                This repository contains multiple deployments for demo testing purposes.
+                Please note that these deployments are not official releases and are intended
+                for testing and demonstration only.
+            </p>
+        </div>
+        <button class="read-more-btn" onclick="window.location.href='https:\/\/github.com/TechElecon/TechElecon.github.io/blob/main/README.md'">Read More</button>
+        <button class="close-btn" onclick="closePopup()">Close</button>
+    </div>
+            <script>
+        function openPopup() {
+            var popup = document.getElementById('popupContainer');
+            popup.style.display = 'block';
+        }
+
+        function closePopup() {
+            var popup = document.getElementById('popupContainer');
+            popup.style.display = 'none';
+        }
+                openPopup();
+    </script>
+    <div class="info-container">
+        <span class="toggledark" id="darkModeButton">Dark Mode</span>
+        <span class="timestamp" id="timestampValue">Timestamp</span>
+        <span class="datafiles">Data Files</span>
+    </div>
+        <div class="transparent-div" id="draggableDiv">
+            <pre id="jsonDisplay" class="grey-text"></pre>
+
+        </div>
+        <!-- Other content of the parent container goes here -->
+    <canvas id="realtimeGraph" class="main-content"></canvas>
+    <script>
+        // Make the div draggable
+        dragElement(document.getElementById("draggableDiv"));
+    
+        function dragElement(elmnt) {
+          var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+          if (document.getElementById(elmnt.id + "-header")) {
+            // if present, the header is where you move the DIV from:
+            document.getElementById(elmnt.id + "-header").onmousedown = dragMouseDown;
+          } else {
+            // otherwise, move the DIV from anywhere inside the DIV:
+            elmnt.onmousedown = dragMouseDown;
+          }
+    
+          function dragMouseDown(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // get the mouse cursor position at startup:
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            document.onmouseup = closeDragElement;
+            // call a function whenever the cursor moves:
+            document.onmousemove = elementDrag;
+          }
+    
+          function elementDrag(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // calculate the new cursor position:
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            // set the element's new position:
+            var newTop = elmnt.offsetTop - pos2;
+            var newLeft = elmnt.offsetLeft - pos1;
+    
+            // Check if the new position is within the window boundaries
+            if (newTop >= 0 && newLeft >= 0 &&
+                newTop + elmnt.offsetHeight <= window.innerHeight &&
+                newLeft + elmnt.offsetWidth <= window.innerWidth) {
+              elmnt.style.top = newTop + "px";
+              elmnt.style.left = newLeft + "px";
+            }
+          }
+    
+          function closeDragElement() {
+            // stop moving when mouse button is released:
+            document.onmouseup = null;
+            document.onmousemove = null;
+          }
+        }
+</script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { signInWithEmailAndPassword, getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        // Replace with your Firebase project configuration
+        var firebaseConfig = {
+            apiKey: "AIzaSyCz7umEsmGFPyjfb3_tqYrtqmaDnnGmc5U",
+            authDomain: "datademo-72ee9.firebaseapp.com",
+            projectId: "datademo-72ee9",
+            storageBucket: "datademo-72ee9.appspot.com",
+            messagingSenderId: "1009601807021",
+            appId: "1:1009601807021:web:5fa3a7fba3984eeee57c24"
+        };
+        // Initialize Firebase
+        const firebaseApp = initializeApp(firebaseConfig);
+        const auth = getAuth(firebaseApp);
+        const db = getDatabase();
+
+        signInWithEmailAndPassword(auth, "ronitrojasara@outlook.com", "ronitronitrojasara")
+        var user_id;
+        // User is signed in
+
+        var ii = 0;
+        // Check if the user is signed in
+        auth.onAuthStateChanged(function (user) {
+            if (user) {
+                // User is signed in, get the user ID
+                user_id = user.uid;
+                // Fetch data from Firebase Realtime Database using UID
+                onValue(ref(db, "users/" + user_id), (snapshot) => {
+                    document.getElementById('jsonDisplay').textContent = JSON.stringify(snapshot.val(), null, 2).replace("{\n","").replace(/"/g, ' ').replace(/,/g, '').replace(/   /g, '').replace(/\n}/g, '');
+                    // if (ii % 2 == 0) {
+                        console.log("hello")
+                        var userData = snapshot.val();
+                        console.log(userData);
+
+                        // Update accelerometer data
+                        myChart.data.datasets[0].data.push(parseFloat(userData.accelX));
+                        myChart.data.datasets[1].data.push(parseFloat(userData.accelY));
+                        myChart.data.datasets[2].data.push(parseFloat(userData.accelZ));
+
+                        // Update gyroscope data
+                        myChart.data.datasets[3].data.push(parseFloat(userData.gyroX));
+                        myChart.data.datasets[4].data.push(parseFloat(userData.gyroY));
+                        myChart.data.datasets[5].data.push(parseFloat(userData.gyroZ));
+
+                        // Update temperature data
+                        myChart.data.datasets[6].data.push(parseFloat(userData.temperature));
+                    
+                        // Update data
+                        myChart.data.datasets[7].data.push(parseFloat(userData.p2pX));
+                        myChart.data.datasets[8].data.push(parseFloat(userData.p2pY));
+                        myChart.data.datasets[9].data.push(parseFloat(userData.p2pZ));
+                        myChart.data.labels.push(ii);
+
+                        if (myChart.data.labels.length > 11) {
+                            // Remove oldest data to keep the graph tidy
+                            myChart.data.labels.shift();
+                            for (var i = 0; i < 10; i++) {
+                                myChart.data.datasets[i].data.shift();
+                            }
+                        }
+
+                        myChart.update();
+                        var timestampValue = document.getElementById('timestampValue');
+                        timestampValue.textContent = userData.timestamp;
+                    // }
+                    ii++;
+                });
+            } else {
+                // User is not signed in, redirect or handle accordingly
+                console.log("User is not signed in");
+            }
+        });
+        document.querySelector('.datafiles').addEventListener('click', openDataFiles);
+
+        var darkModeButton = document.getElementById('darkModeButton');
+        darkModeButton.addEventListener('click', toggleDarkMode);
+
+        // Function to open data files
+        function openDataFiles() {
+            window.location.href = '/files';
+        }
+
+        // Function to toggle dark mode
+        function toggleDarkMode() {
+            var darkModeButton = document.getElementById('darkModeButton');
+            var darkModeEnabled = document.body.classList.toggle('dark-mode');
+
+            if (darkModeEnabled) {
+                // Dark mode is enabled
+                darkModeButton.textContent = 'Light Mode';
+            } else {
+                // Dark mode is disabled
+                darkModeButton.textContent = 'Dark Mode';
+            }
+        }
+
+        // Initialize Chart.js
+        var ctx = document.getElementById('realtimeGraph').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        label: 'Accelerometer X',
+                        borderColor: 'rgb(255, 99, 132)',
+                        data: [],
+                    },
+                    {
+                        label: 'Accelerometer Y',
+                        borderColor: 'rgb(75, 192, 192)',
+                        data: [],
+                    },
+                    {
+                        label: 'Accelerometer Z',
+                        borderColor: 'rgb(255, 205, 86)',
+                        data: [],
+                    },
+                    {
+                        label: 'Gyroscope X',
+                        borderColor: 'rgb(54, 162, 235)',
+                        data: [],
+                    },
+                    {
+                        label: 'Gyroscope Y',
+                        borderColor: 'rgb(153, 102, 255)',
+                        data: [],
+                    },
+                    {
+                        label: 'Gyroscope Z',
+                        borderColor: 'rgb(255, 159, 64)',
+                        data: [],
+                    },
+                    {
+                        label: 'Temperature',
+                        borderColor: 'rgb(255, 0, 0)',
+                        data: [],
+                    },
+                          {
+        label: 'Peak To Peak X',
+        borderColor: 'rgb(0, 255, 0)',
+        data: [],
+      },
+      {
+        label: 'Peak To Peak Y',
+        borderColor: 'rgb(0, 0, 255)',
+        data: [],
+      },
+      {
+        label: 'Peak To Peak Z',
+        borderColor: 'rgb(255, 255, 0)',
+        data: [],
+      }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+
+
+    </script>
+
+</body>
+
+</html>
