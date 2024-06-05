@@ -86,7 +86,9 @@ body{
         /* padding: 10px; */
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
     }
-    
+    #logo{
+        padding: 16px;
+    }
 }
 #main{
     background-color: #f2f2f2;
@@ -97,7 +99,7 @@ body{
 
 #logo{
     background-color: white;
-    padding: 16px;
+    /* padding: 16px; */
     margin: 10px 0px;
 }
 
@@ -109,8 +111,7 @@ body{
 
 #add-device{
     font-size: 24px;
-    padding-top: 24px;
-    padding-bottom: 24px;
+    padding-bottom: 10px;
 }
 
 #add{
