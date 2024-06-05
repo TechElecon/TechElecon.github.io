@@ -11,8 +11,44 @@
         <div id="logo">
             <b id="logo-text">TECH ELECON</b>
         </div>
-
+        <div id="list">
+            <hr class="top-hr" />
+            <div class="list-item">
+                Velocity                
+            </div>
+            <hr/>
+            <div class="list-item">
+                Acceleration
+            </div>
+            <hr/>
+            <div class="list-item">
+                Temprature
+            </div>
+            <hr class="thick-hr">
+            <div class="list-item" >
+                Data
+            </div>
+            <hr/>
+        </div>
+        
     </div>
+    <button class="floating-button" id="float">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+        </button>
+        <script>
+            document.getElementById("float").addEventListener("click",toggleBtn)
+            function toggleBtn(){
+               if( document.getElementsByClassName("active").length > 0){
+                document.getElementById("float").classList.remove("active")
+                document.getElementById("list").style.display = "none"
+               }else{
+                document.getElementById("float").classList.add("active")
+                document.getElementById("list").style.display = "block"
+               }
+            }
+        </script>
     <div id="main">
 
     </div>
