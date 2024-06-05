@@ -89,12 +89,19 @@ body{
     #logo{
         padding: 16px;
     }
+    #add{
+        display: unset !important;
+    }
+
+    .floating-button{
+        display: none !important;
+    }
 }
 #main{
     background-color: #f2f2f2;
-    min-height:  calc(100% - 173px);
+    min-height:  calc(100% - 50px);
     width: 100%;
-    padding-top: 173px;
+    padding-top: 50px;
 }
 
 #logo{
@@ -111,10 +118,10 @@ body{
 
 #add-device{
     font-size: 24px;
-    padding-bottom: 10px;
 }
 
 #add{
+    display: none;
     width: calc(100% - 40px);
     padding: 10px;
     background-color: #003366; /* Dark blue */
@@ -214,4 +221,30 @@ body{
 #popup-buttons{
 display: flex;
 gap: 10px;
+}
+
+
+
+.floating-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #003366;
+    color: white;
+    border: none;
+    border-radius: 10%;
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.floating-button:hover {
+    background-color: #002244;
+    /* transform: scale(1.1); */
 }

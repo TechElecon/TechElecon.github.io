@@ -16,6 +16,8 @@
         </div>
 
     </div>
+    <button class="floating-button" id="float">+</button>
+
     <div id="main">
         <div class="grid-container">
             <div class="grid-item">
@@ -54,7 +56,8 @@
 </div>
 <script>
     document.getElementById("cancel").addEventListener("click", dismiss);
-    document.getElementById("add-device").addEventListener("click", openPopup);
+    document.getElementById("add").addEventListener("click", openPopup);
+    document.getElementById("float").addEventListener("click", openPopup);
 
 function dismiss() {
     document.getElementById("popup").style.display = "none";
