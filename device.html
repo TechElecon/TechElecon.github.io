@@ -45,7 +45,7 @@
     <script>
         document.getElementById("float").addEventListener("click", toggleBtn)
         function toggleBtn() {
-            if (document.getElementsByClassName("active").length > 0) {
+            if (document.getElementById("float").classList.contains("active")) {
                 document.getElementById("float").classList.remove("active")
                 document.getElementById("list").style.display = "none"
             } else {
