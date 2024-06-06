@@ -1,11 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Device</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <!-- Include PapaParse -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <link rel="stylesheet" href="device_style.css" />
 </head>
+
 <body>
     <div id="parent-bar">
         <div id="logo">
@@ -14,43 +19,134 @@
         <div id="list">
             <hr class="top-hr" />
             <div class="list-item">
-                Velocity                
+                Velocity
             </div>
-            <hr/>
+            <hr />
             <div class="list-item">
                 Acceleration
             </div>
-            <hr/>
+            <hr />
             <div class="list-item">
                 Temprature
             </div>
             <hr class="thick-hr">
-            <div class="list-item" >
-                Data
+            <div class="list-item">
+                Previous Data
             </div>
-            <hr/>
+            <hr />
         </div>
-        
+
     </div>
     <button class="floating-button" id="float">
         <span class="bar"></span>
         <span class="bar"></span>
         <span class="bar"></span>
-        </button>
-        <script>
-            document.getElementById("float").addEventListener("click",toggleBtn)
-            function toggleBtn(){
-               if( document.getElementsByClassName("active").length > 0){
+    </button>
+    <script>
+        document.getElementById("float").addEventListener("click", toggleBtn)
+        function toggleBtn() {
+            if (document.getElementsByClassName("active").length > 0) {
                 document.getElementById("float").classList.remove("active")
                 document.getElementById("list").style.display = "none"
-               }else{
+            } else {
                 document.getElementById("float").classList.add("active")
                 document.getElementById("list").style.display = "block"
-               }
             }
-        </script>
+        }
+    </script>
     <div id="main">
-
+        <div class="graph" id="graph0"></div>
+        <div class="graph" id="graph1"></div>
+        <div class="graph" id="graph2"></div>
     </div>
+    <script>
+    fetchCSV("https://techelecon.github.io/temps/2024-03-16-14_36.csv");
+
+function fetchCSV(url) {
+            fetch(url)
+                .then(response => response.text())
+                .then(csv => parseCSV(csv))
+                .catch(error => console.error('Error fetching CSV:', error));
+        }
+
+        function parseCSV(csv) {
+                        // showContent("velocity-");
+            // Parse the CSV data
+            const data = Papa.parse(csv, { header: true }).data;
+
+            // Extract data for plotting
+            const time = data.map(item => parseInt(item.Timestamp)); // Assuming 'time' is a column in your CSV
+            const accelerationX = data.map(item => parseFloat(item.AccelX)); // Assuming 'accelerationX' is a column in your CSV
+            const accelerationY = data.map(item => parseFloat(item.AccelY)); // Assuming 'accelerationY' is a column in your CSV
+            const accelerationZ = data.map(item => parseFloat(item.AccelZ)); // Assuming 'accelerationZ' is a column in your CSV
+            const temperature = data.map(item => parseFloat(item.Temperature)); // Assuming 'temperature' is a column in your CSV
+
+
+            // Calculate average values for each dataset
+            const calculateAverage = (values) => {
+                const validValues = values.filter(value => !isNaN(value));
+                return validValues.length > 0 ? validValues.reduce((acc, val) => (parseFloat(acc) + parseFloat(val)).toFixed(3), 0) / validValues.length : NaN;
+            };
+            const averageX = calculateAverage(accelerationX);
+            const averageY = calculateAverage(accelerationY);
+            const averageZ = calculateAverage(accelerationZ);
+            // Calculate average values for each dataset
+
+            // Subtract average value from each data point
+            const modifiedAccelerationX = accelerationX.map(val => (val - averageX.toFixed(3)) * 1000);
+            const modifiedAccelerationY = accelerationY.map(val => (val - averageY.toFixed(3)) * 1000);
+            const modifiedAccelerationZ = accelerationZ.map(val => (val - averageZ.toFixed(3)) * 1000);
+
+                    const layout = {
+                xaxis: {
+                    title: 'Time (milliseconds)',
+                    type: 'linear',
+                    scaleanchor: 'y', // Anchor x-axis scale to y-axis scale
+                    scaleratio: 5 // Set the x-axis scale ratio to 500
+                },
+                yaxis: {
+                    title: 'mm/s2',
+                },
+                title: 'Acceleration'
+            };
+            const traceX = {
+                x: time,
+                y: modifiedAccelerationX,
+                mode: 'lines',
+                name: 'Acceleration X',
+                line: { color: 'red' }
+            };
+            const traceY = {
+                x: time,
+                y: modifiedAccelerationY,
+                mode: 'lines',
+                name: 'Acceleration Y',
+                line: { color: 'green' }
+            };
+            const traceZ = {
+                x: time,
+                y: modifiedAccelerationZ,
+                mode: 'lines',
+                name: 'Acceleration Z',
+                line: { color: 'blue' }
+            };
+Plotly.newPlot('graph0', [traceX, traceY, traceZ], layout, { scrollZoom: true, });
+Plotly.Plots.resize('graph0');
+
+
+        // Get all anchor elements with href="https://plotly.com/"
+        const plotlyLinks = document.querySelectorAll('a[href="https://plotly.com/"]');
+
+        // Loop through each matching anchor element
+        plotlyLinks.forEach(link => {
+            // Check if the parent element exists
+            if (link.parentNode) {
+                // Remove the parent element
+                link.parentNode.remove();
+            }
+        });
+    }
+    </script>
 </body>
+
 </html>

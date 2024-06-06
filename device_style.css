@@ -150,3 +150,21 @@ hr{
 .floating-button.active .bar:nth-child(3) {
     transform: translateY(-8px) rotate(-45deg);
 }
+
+.graph{
+    height: 96%;
+    width: 96%;
+    margin: 2%;
+}
+
+#graph0{
+    display: block;
+}
+
+#graph1{
+    display: none;
+}
+
+#graph2{
+    display: none;
+}
