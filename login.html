@@ -1,23 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Page</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div class="login-container">
         <h2>Login</h2>
-        <form action="/login" method="POST">
+        <form id="loginForm" >
             <label for="username">Username</label>
             <input type="text" id="username" name="username" required>
-            
+
             <label for="password">Password</label>
             <input type="password" id="password" name="password" required>
-            
+
             <button type="submit">Login</button>
         </form>
     </div>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js'
+
+        // Add Firebase products that you want to use
+        import { getAuth, signInWithEmailAndPassword,onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js'
+
+
+
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCz7umEsmGFPyjfb3_tqYrtqmaDnnGmc5U",
+            authDomain: "datademo-72ee9.firebaseapp.com",
+            databaseURL: "https://datademo-72ee9-default-rtdb.firebaseio.com",
+            projectId: "datademo-72ee9",
+            storageBucket: "datademo-72ee9.appspot.com",
+            messagingSenderId: "1009601807021",
+            appId: "1:1009601807021:web:5fa3a7fba3984eeee57c24"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+
+        var email,password = null;
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Redirect to the homepage if the user is already authenticated
+                window.location.href = 'https://techelecon.github.io/dashboard';
+            }
+        });
+        signInWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+                // Signed in 
+                const user = userCredential.user;
+                // ...
+            })
+            .catch((error) => {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                // alert(errorMessage);
+            });
+
+            
+        // Function to handle form submissions
+        const handleFormSubmit = (formId, submitCallback) => {
+            document.getElementById(formId).addEventListener('submit', async function (event) {
+                event.preventDefault(); try {
+                    await submitCallback();
+                } catch (error) {
+                    displayErrorAlert(error.message);
+                }
+            });
+        };
+
+        // Login form submission
+        handleFormSubmit('loginForm', async () => {
+            const email = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                console.log('User logged in:', userCredential.user);
+                localStorage.setItem('userToken', userCredential.user.accessToken);
+                window.location.href = 'https://techelecon.github.io/dashboard';
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+
+    </script>
 </body>
+
 </html>
